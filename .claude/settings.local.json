@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(unzip:*)",
+      "Bash(\"D:/Programacion/sector-7g-backlog-personal/package.json\":*)",
+      "Bash(\"D:/Programacion/sector-7g-backlog-personal/.gitignore\":*)",
+      "Bash(npx create-next-app@latest app --typescript --tailwind --app --src-dir --no-eslint --import-alias \"@/*\" --yes)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma init)",
+      "Bash(\"D:/Programacion/sector-7g-backlog-personal/mcp-server/tsconfig.json\":*)",
+      "Bash(\"D:/Programacion/sector-7g-backlog-personal/mcp-server/package.json\":*)",
+      "Bash(\"D:/Programacion/sector-7g-backlog-personal/.env.example\":*)",
+      "Bash(\"D:/Programacion/sector-7g-backlog-personal/app/.env\":*)",
+      "Bash(\"D:/Programacion/sector-7g-backlog-personal/app/prisma/schema.prisma\":*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx shadcn@latest init --defaults)",
+      "Bash(npx shadcn@latest add badge button card dialog input label select separator textarea toast)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(\"D:\\\\Programacion\\\\sector-7g-backlog-personal\\\\app\\\\src\\\\lib\\\\auth.ts\":*)",
+      "Bash(\"D:\\\\Programacion\\\\sector-7g-backlog-personal\\\\app\\\\src\\\\lib\\\\prisma.ts\":*)",
+      "Bash(\"D:\\\\Programacion\\\\sector-7g-backlog-personal\\\\app\\\\src\\\\lib\\\\storage.ts\":*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(curl:*)",
+      "Bash(curl -s -H \"Authorization: Bearer sk-sector7g-c2e91f4a8b3d7e6f1a5c9b2d4e8f7a3b\" http://localhost:3000/api/projects)",
+      "Bash(BACKLOG_API_URL=http://localhost:3000/api BACKLOG_API_KEY=sk-sector7g-c2e91f4a8b3d7e6f1a5c9b2d4e8f7a3b node:*)",
+      "Bash(pkill:*)",
+      "Bash(python3:*)",
+      "Bash(node -e:*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)",
+      "Bash(npx next build)"
+    ]
+  }
+}

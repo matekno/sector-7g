@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+app/.next/
+app/out/
+
+# Build outputs
+mcp-server/dist/
+
+# Environment files
+.env
+.env.local
+app/.env
+app/.env.local
+
+# Uploads (local file storage)
+app/uploads/
+
+# Misc
+.DS_Store
+*.pem

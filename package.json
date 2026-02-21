@@ -1,0 +1,15 @@
+{
+  "name": "sector-7g-backlog-personal",
+  "private": true,
+  "workspaces": [
+    "app",
+    "mcp-server"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=app",
+    "build": "npm run build --workspace=mcp-server && npm run build --workspace=app",
+    "build:mcp": "npm run build --workspace=mcp-server",
+    "mcp:stdio": "node mcp-server/dist/index.js --transport stdio",
+    "mcp:sse": "node mcp-server/dist/index.js --transport sse --port 3001"
+  }
+}
