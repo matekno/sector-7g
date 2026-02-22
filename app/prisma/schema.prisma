@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  description String?       @db.Text
+  status      ProjectStatus @default(IDEA)
+  priority    Priority      @default(MEDIUM)
+
+  repoUrl    String?
+  deployUrl  String?
+  blogUrl    String?
+  extraLinks Json?
+
+  notes Note[]
+  files File[]
+  tags  TagsOnProjects[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  archivedAt DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ProjectStatus {
+  IDEA
+  PLANNED
+  IN_PROGRESS
+  PAUSED
+  DONE
+  ARCHIVED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Note {
+  id      String   @id @default(cuid())
+  content String   @db.Text
+  type    NoteType @default(GENERAL)
+  source  String?
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  versions NoteVersion[]
+  version  Int           @default(1)
+
+  files File[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([type])
+}
+
+enum NoteType {
+  GENERAL
+  PLAN
+  DECISION
+  BRAINSTORM
+  SPEC
+  LOG
+  SUMMARY
+}
+
+model NoteVersion {
+  id      String @id @default(cuid())
+  content String @db.Text
+  version Int
+
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  noteId String
+
+  createdAt DateTime @default(now())
+
+  @@index([noteId])
+}
+
+model File {
+  id       String @id @default(cuid())
+  filename String
+  mimeType String
+  size     Int
+  path     String
+
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId String?
+  note      Note?    @relation(fields: [noteId], references: [id], onDelete: SetNull)
+  noteId    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+  @@index([noteId])
+}
+
+model Tag {
+  id       String           @id @default(cuid())
+  name     String           @unique
+  color    String?
+  projects TagsOnProjects[]
+
+  @@index([name])
+}
+
+model TagsOnProjects {
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId     String
+
+  @@id([projectId, tagId])
+}
