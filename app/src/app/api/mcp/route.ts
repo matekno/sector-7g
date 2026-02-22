@@ -7,14 +7,17 @@ function checkAuth(request: NextRequest): NextResponse | null {
   const apiKey = process.env.API_KEY;
   if (!apiKey) return null; // misconfigured but don't block
 
+  // 1. Bearer token (Claude Desktop / Streamable HTTP clients)
   const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (authHeader?.startsWith("Bearer ") && authHeader.slice(7) === apiKey) {
+    return null;
   }
-  if (authHeader.slice(7) !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  return null;
+
+  // 2. Query param ?apiKey= (Claude.ai web UI — no soporta Bearer en la config)
+  const queryKey = request.nextUrl.searchParams.get("apiKey");
+  if (queryKey === apiKey) return null;
+
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
 function buildServer(): McpServer {
