@@ -86,10 +86,19 @@ export async function PATCH(
     }
   }
 
+  // Keep archivedAt in sync with status changes
+  const archivedAtPatch =
+    data.status === "ARCHIVED"
+      ? { archivedAt: project.archivedAt ?? new Date() }
+      : data.status !== undefined
+      ? { archivedAt: null }
+      : {};
+
   const updated = await prisma.project.update({
     where: { id },
     data: {
       ...data,
+      ...archivedAtPatch,
       ...(extraLinks !== undefined
         ? {
             extraLinks:

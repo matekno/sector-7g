@@ -24,22 +24,48 @@ export function registerUpdateProject(server: McpServer, client: BacklogClient) 
       removeTags: z.array(z.string()).optional().describe("Tag names to remove"),
     },
     async (args) => {
-      const { projectId, ...data } = args;
-      const project = await client.updateProject(projectId, data);
-      const tagNames = project.tags.map((t) => t.tag.name).join(", ");
+      try {
+        const { projectId: rawId, ...data } = args;
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: [
-              `✅ Project updated: **${project.title}**`,
-              `Status: ${project.status} | Priority: ${project.priority}`,
-              tagNames ? `Tags: ${tagNames}` : "Tags: (none)",
-            ].join("\n"),
-          },
-        ],
-      };
+        // Support short/prefix IDs
+        const projectId = await client.resolveProjectId(rawId);
+        if (!projectId) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `❌ No project found with ID "${rawId}".`,
+              },
+            ],
+          };
+        }
+
+        const project = await client.updateProject(projectId, data);
+        const tagNames = project.tags.map((t) => t.tag.name).join(", ");
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: [
+                `✅ Project updated: **${project.title}**`,
+                `ID: \`${project.id}\``,
+                `Status: ${project.status} | Priority: ${project.priority}`,
+                tagNames ? `Tags: ${tagNames}` : "Tags: (none)",
+              ].join("\n"),
+            },
+          ],
+        };
+      } catch (err) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `❌ Error updating project: ${err instanceof Error ? err.message : String(err)}`,
+            },
+          ],
+        };
+      }
     }
   );
 }

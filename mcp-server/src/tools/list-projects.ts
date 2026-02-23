@@ -68,7 +68,7 @@ export function registerListProjects(server: McpServer, client: BacklogClient) {
             ? ` [${p.tags.map((t) => t.tag.name).join(", ")}]`
             : "";
         const noteCount = p._count?.notes ?? 0;
-        return `${statusEmoji} ${priorityEmoji} **${p.title}** (${p.id.slice(0, 8)})${tags} — ${noteCount} note${noteCount !== 1 ? "s" : ""}`;
+        return `${statusEmoji} ${priorityEmoji} **${p.title}** \`${p.id}\`${tags} — ${noteCount} note${noteCount !== 1 ? "s" : ""}`;
       });
 
       const filterDesc = [

@@ -33,57 +33,82 @@ export function registerAddNote(server: McpServer, client: BacklogClient) {
         .describe("Source of the note: 'claude-chat', 'claude-code', or 'manual'"),
     },
     async (args) => {
-      let projectId = args.projectId;
+      try {
+        let projectId = args.projectId;
 
-      // If no projectId, fuzzy match by title
-      if (!projectId) {
-        if (!args.projectTitle) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "❌ Provide either projectId or projectTitle to identify the project.",
-              },
-            ],
-          };
+        if (projectId) {
+          // Support short/prefix IDs
+          const resolved = await client.resolveProjectId(projectId);
+          if (!resolved) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `❌ No project found with ID "${projectId}". Use list_projects to find the correct ID or provide a projectTitle instead.`,
+                },
+              ],
+            };
+          }
+          projectId = resolved;
+        } else {
+          // Fuzzy match by title
+          if (!args.projectTitle) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "❌ Provide either projectId or projectTitle to identify the project.",
+                },
+              ],
+            };
+          }
+
+          const found = await client.findProjectByTitle(args.projectTitle);
+          if (!found) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: [
+                    `❌ No project found matching "${args.projectTitle}".`,
+                    "Use create_project to create it first, or list_projects to see existing projects.",
+                  ].join(" "),
+                },
+              ],
+            };
+          }
+          projectId = found.id;
         }
 
-        const found = await client.findProjectByTitle(args.projectTitle);
-        if (!found) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: [
-                  `❌ No project found matching "${args.projectTitle}".`,
-                  "Use create_project to create it first, or list_projects to see existing projects.",
-                ].join(" "),
-              },
-            ],
-          };
-        }
-        projectId = found.id;
+        const note = await client.addNote(projectId, {
+          content: args.content,
+          type: args.type,
+          source: args.source,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: [
+                `✅ Note added to project.`,
+                `Note ID: ${note.id}`,
+                `Type: ${note.type} | Source: ${note.source ?? "manual"}`,
+                `Preview: ${note.content.slice(0, 100)}${note.content.length > 100 ? "..." : ""}`,
+              ].join("\n"),
+            },
+          ],
+        };
+      } catch (err) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `❌ Error adding note: ${err instanceof Error ? err.message : String(err)}`,
+            },
+          ],
+        };
       }
-
-      const note = await client.addNote(projectId, {
-        content: args.content,
-        type: args.type,
-        source: args.source,
-      });
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: [
-              `✅ Note added to project.`,
-              `Note ID: ${note.id}`,
-              `Type: ${note.type} | Source: ${note.source ?? "manual"}`,
-              `Preview: ${note.content.slice(0, 100)}${note.content.length > 100 ? "..." : ""}`,
-            ].join("\n"),
-          },
-        ],
-      };
     }
   );
 }

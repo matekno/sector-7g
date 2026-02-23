@@ -138,13 +138,16 @@ export class BacklogClient {
   async search(
     query: string,
     type: "projects" | "notes" | "all" = "all",
-    limit = 10
+    limit = 10,
+    noteType?: string
   ): Promise<{ results: SearchResult[]; query: string }> {
+    const params: Record<string, string> = { q: query, type, limit: String(limit) };
+    if (noteType) params.noteType = noteType;
     return this.request<{ results: SearchResult[]; query: string }>(
       "GET",
       "/search",
       undefined,
-      { q: query, type, limit: String(limit) }
+      params
     );
   }
 
@@ -166,5 +169,28 @@ export class BacklogClient {
       ) ??
       null
     );
+  }
+
+  /**
+   * Resolve a full project ID from an exact ID or a short prefix.
+   * First tries a direct GET (fast path for correct full IDs).
+   * If that fails, lists all projects (including archived) and finds
+   * the first one whose ID starts with the given prefix.
+   */
+  async resolveProjectId(idOrPrefix: string): Promise<string | null> {
+    // Fast path: try exact lookup
+    try {
+      const project = await this.getProject(idOrPrefix);
+      return project.id;
+    } catch {
+      // Fall back to prefix search across normal + archived projects
+      const [normal, archived] = await Promise.all([
+        this.listProjects({ limit: 200 }),
+        this.listProjects({ status: "ARCHIVED", limit: 200 }),
+      ]);
+      const all = [...normal.projects, ...archived.projects];
+      const found = all.find((p) => p.id.startsWith(idOrPrefix));
+      return found?.id ?? null;
+    }
   }
 }

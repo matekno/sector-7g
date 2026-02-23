@@ -21,9 +21,13 @@ export function registerSearch(server: McpServer, client: BacklogClient) {
         .optional()
         .default(10)
         .describe("Max results"),
+      noteType: z
+        .enum(["GENERAL", "PLAN", "DECISION", "BRAINSTORM", "SPEC", "LOG", "SUMMARY"])
+        .optional()
+        .describe("Filter notes by type (only applies when type is 'notes' or 'all')"),
     },
     async (args) => {
-      const { results } = await client.search(args.query, args.type, args.limit);
+      const { results } = await client.search(args.query, args.type, args.limit, args.noteType);
 
       if (results.length === 0) {
         return {
@@ -38,7 +42,7 @@ export function registerSearch(server: McpServer, client: BacklogClient) {
 
       const lines = results.map((r, i) => {
         const typeLabel = r.type === "project" ? "📁 Project" : "📝 Note";
-        const projectRef = r.type === "note" && r.projectId ? ` (project: ${r.projectId.slice(0, 8)})` : "";
+        const projectRef = r.type === "note" && r.projectId ? ` (project: \`${r.projectId}\`)` : "";
         return [
           `${i + 1}. ${typeLabel}: **${r.title}**${projectRef}`,
           `   ID: ${r.id}`,
