@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type SearchResultType = "project" | "note";
@@ -25,7 +26,8 @@ function sanitizeQuery(q: string): string {
 export async function fullTextSearch(
   query: string,
   type: "projects" | "notes" | "all" = "all",
-  limit = 10
+  limit = 10,
+  noteType?: string
 ): Promise<SearchResult[]> {
   const tsQuery = sanitizeQuery(query);
   if (!tsQuery) return [];
@@ -70,18 +72,24 @@ export async function fullTextSearch(
   }
 
   if (type === "notes" || type === "all") {
+    const noteTypeFilter = noteType
+      ? Prisma.sql`AND n.type = ${noteType}`
+      : Prisma.empty;
+
     const noteResults = await prisma.$queryRaw<
       Array<{
         id: string;
         content: string;
         projectId: string;
+        type: string;
         rank: number;
       }>
-    >`
+    >(Prisma.sql`
       SELECT
         n.id,
         n.content,
         n."projectId",
+        n.type,
         ts_rank(
           to_tsvector('english', n.content),
           to_tsquery('english', ${tsQuery})
@@ -92,9 +100,10 @@ export async function fullTextSearch(
         p."archivedAt" IS NULL
         AND to_tsvector('english', n.content)
           @@ to_tsquery('english', ${tsQuery})
+        ${noteTypeFilter}
       ORDER BY rank DESC
       LIMIT ${limit}
-    `;
+    `);
 
     for (const r of noteResults) {
       results.push({
