@@ -12,17 +12,19 @@ export function proxy(request: NextRequest) {
     return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
   }
 
+  // Bearer token (API routes, Claude Desktop, mcp-server)
   const authHeader = request.headers.get("authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (authHeader?.startsWith("Bearer ") && authHeader.slice(7) === apiKey) {
+    return NextResponse.next();
   }
 
-  const token = authHeader.slice(7);
-  if (token !== apiKey) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Query param (Claude.ai web UI — no soporta Bearer en su config de MCP)
+  const queryKey = request.nextUrl.searchParams.get("apiKey");
+  if (queryKey === apiKey) {
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
 export const config = {
