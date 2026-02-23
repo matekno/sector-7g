@@ -333,7 +333,31 @@ export function registerMcpTools(server: McpServer) {
     }
   );
 
-  // 9. upload_file (disabled on Vercel)
+  // 9. delete_project
+  server.tool(
+    "delete_project",
+    "Archive (soft-delete) or permanently delete a project. Defaults to archive.",
+    {
+      projectId: z.string(),
+      hard: z.boolean().optional().default(false),
+    },
+    async ({ projectId, hard }) => {
+      const project = await prisma.project.findUnique({ where: { id: projectId }, select: { title: true } });
+      if (!project) return text("❌ Project not found.");
+      if (hard) {
+        await prisma.project.delete({ where: { id: projectId } });
+        return text(`🗑️ Project **${project.title}** permanently deleted.`);
+      } else {
+        await prisma.project.update({
+          where: { id: projectId },
+          data: { archivedAt: new Date(), status: "ARCHIVED" },
+        });
+        return text(`📦 Project **${project.title}** archived. Use update_project to restore it.`);
+      }
+    }
+  );
+
+  // 10. upload_file (disabled on Vercel)
   server.tool(
     "upload_file",
     "Upload a file to a project or note. (Not available in the hosted version — use the local MCP server for file uploads.)",

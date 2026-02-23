@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { TagBadge } from "@/components/tag-badge";
 import { NoteList } from "@/components/note-list";
 import { Badge } from "@/components/ui/badge";
+import { ProjectActions } from "@/components/project-actions";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -43,13 +44,14 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-zinc-50">
       <header className="bg-white border-b px-6 py-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-3">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <Link
             href="/projects"
             className="text-muted-foreground hover:text-foreground text-sm"
           >
             ← Projects
           </Link>
+          <ProjectActions project={project} />
         </div>
       </header>
 

@@ -85,6 +85,10 @@ export class BacklogClient {
     return this.request<Project>("POST", "/projects", data);
   }
 
+  async deleteProject(id: string, hard = false): Promise<void> {
+    return this.request<void>("DELETE", `/projects/${id}`, undefined, hard ? { hard: "true" } : undefined);
+  }
+
   async updateProject(
     id: string,
     data: {

@@ -9,6 +9,7 @@ import { registerSearch } from "./search.js";
 import { registerBacklogSummary } from "./backlog-summary.js";
 import { registerEditNote } from "./edit-note.js";
 import { registerUploadFile } from "./upload-file.js";
+import { registerDeleteProject } from "./delete-project.js";
 
 export function registerAll(server: McpServer, client: BacklogClient) {
   registerCreateProject(server, client);
@@ -16,6 +17,7 @@ export function registerAll(server: McpServer, client: BacklogClient) {
   registerGetProject(server, client);
   registerListProjects(server, client);
   registerUpdateProject(server, client);
+  registerDeleteProject(server, client);
   registerSearch(server, client);
   registerBacklogSummary(server, client);
   registerEditNote(server, client);
